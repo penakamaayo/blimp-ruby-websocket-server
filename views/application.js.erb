@@ -9,6 +9,15 @@ var ws       = new WebSocket(uri);
 var host = "<%= @host %>"
 var port = "<%= @port %>"
 
+ws.onmessagex = function(message) {
+  var data = message.data;
+  $("#messages-2k13").prepend("<div class='panel panel-default'><div class='panel-heading'  style='height: auto; line-height: 50%; word-wrap: break-word; font-size: 65%'>" + data + "</div><div class='panel-body' style='height: 50%; line-height: 50%;'>" + data + "</div></div>");
+  // $("#messages-2k13").prepend("<div class='panel panel-default'><div class='panel-heading' >" + data.handle + "</div><div class='panel-body'>" + data.text + "</div></div>");
+  $("#messages-2k13").stop().animate({
+    scrollTop: $('#messages-2k13')[0].scrollHeight
+  }, 800);
+};
+
 ws.onmessage = function(message) {
   var data = JSON.parse(message.data);
   $("#messages-2k13").prepend("<div class='panel panel-default'><div class='panel-heading'  style='height: auto; line-height: 50%; word-wrap: break-word; font-size: 65%'>" + data.handle + "</div><div class='panel-body' style='height: 50%; line-height: 50%;'>" + data.text + "</div></div>");
@@ -19,9 +28,10 @@ ws.onmessage = function(message) {
 };
 
 
+
 function robot_send(msg){
   ws.send( JSON.stringify( {
-     handle : "TO:"+"Robot"+ "&nbsp&nbsp&nbsp&nbspFR:" +host+":"+port,
+     handle : "TO:"+"Robot"+ " FR:" +host+":"+port,
      text   : msg
     } )
   );
@@ -31,7 +41,7 @@ function robot_send(msg){
 
 $("#input-form").on("submit", function(event) {
   event.preventDefault();
-  var handle = "TO:" + $("#input-handle")[0].value + "&nbsp&nbsp&nbsp&nbspFR:"+host+":"+port ;
+  var handle = "[TO:].. " + $("#input-handle")[0].value + ".... [FR:].."+host+":"+port ;
   var text   = $("#input-text")[0].value;
   ws.send(JSON.stringify({ handle: handle, text: text }));
   $("#input-text")[0].value = "";

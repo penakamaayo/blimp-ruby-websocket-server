@@ -28,20 +28,30 @@ module ChatDemo
       if Faye::WebSocket.websocket?(env)
         ws = Faye::WebSocket.new(env, nil, {ping: KEEPALIVE_TIME })
         ws.on :open do |event|
+          # p [:open, env, ws.object_id]
           p [:open, ws.object_id]
           @clients << ws
         end
 
         ws.on :message do |event|
           p [:message, event.data]
+          js = JSON.parse event.data
+          h = js["handle"]
+          t = js["text"]
+          ts = t.to_s
+
+          jmsg = {"handle"=>h, "text"=>ts}.to_json
+          puts jmsg
+
           # @redis.publish(CHANNEL, sanitize(event.data))
 
           # because we are not using redis
-          @clients.each {|client| client.send(event.data) }
+          # @clients.each {|client| client.send(event.data) }
+          @clients.each {|client| client.send(jmsg) }
         end
 
         ws.on :close do |event|
-          p [:close, ws.object_id, event.code, event.reason]
+          puts [:close, ws.object_id, event.code, event.reason]
           @clients.delete(ws)
           ws = nil
         end
